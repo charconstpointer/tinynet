@@ -3,6 +3,7 @@ package tinynet
 import (
 	"encoding/binary"
 	"errors"
+	"net"
 	"strconv"
 	"strings"
 	"time"
@@ -11,11 +12,6 @@ import (
 )
 
 type IP []byte
-
-type Addr interface {
-	Network() string
-	String() string
-}
 
 type TCPAddr struct {
 	stringAddr string
@@ -60,15 +56,7 @@ func ResolveTCPAddr(network, address string) (*TCPAddr, error) {
 	}, nil
 }
 
-type Listener interface {
-	Accept() (Conn, error)
-
-	Close() error
-
-	Addr() Addr
-}
-
-func Listen(network, address string) (Listener, error) {
+func Listen(network, address string) (net.Listener, error) {
 	laddr, err := ResolveTCPAddr(network, address)
 	if err != nil {
 		return TCPListener{}, err
@@ -111,18 +99,18 @@ func ListenTCP(network string, laddr *TCPAddr) (*TCPListener, error) {
 
 type TCPListener struct {
 	fd   int32
-	addr Addr
+	addr net.Addr
 }
 
 func (t TCPListener) Close() error {
 	return unisockets.Shutdown(t.fd, unisockets.SHUT_RDWR)
 }
 
-func (t TCPListener) Addr() Addr {
+func (t TCPListener) Addr() net.Addr {
 	return t.addr
 }
 
-func (l TCPListener) Accept() (Conn, error) {
+func (l TCPListener) Accept() (net.Conn, error) {
 	conn, err := l.AcceptTCP()
 
 	return conn, err
@@ -142,7 +130,7 @@ func (l *TCPListener) AcceptTCP() (*TCPConn, error) {
 	}, nil
 }
 
-func Dial(network, address string) (Conn, error) {
+func Dial(network, address string) (net.Conn, error) {
 	raddr, err := ResolveTCPAddr(network, address)
 	if err != nil {
 		return TCPConn{}, err
@@ -184,29 +172,11 @@ func DialTCP(network string, laddr, raddr *TCPAddr) (*TCPConn, error) {
 	}, nil
 }
 
-type Conn interface {
-	Read(b []byte) (n int, err error)
-
-	Write(b []byte) (n int, err error)
-
-	Close() error
-
-	LocalAddr() Addr
-
-	RemoteAddr() Addr
-
-	SetDeadline(t time.Time) error
-
-	SetReadDeadline(t time.Time) error
-
-	SetWriteDeadline(t time.Time) error
-}
-
 type TCPConn struct {
 	fd int32
 
-	laddr Addr
-	raddr Addr
+	laddr net.Addr
+	raddr net.Addr
 }
 
 func (c TCPConn) Read(b []byte) (int, error) {
@@ -235,11 +205,11 @@ func (c TCPConn) Close() error {
 	return unisockets.Shutdown(c.fd, unisockets.SHUT_RDWR)
 }
 
-func (c TCPConn) LocalAddr() Addr {
+func (c TCPConn) LocalAddr() net.Addr {
 	return c.laddr
 }
 
-func (c TCPConn) RemoteAddr() Addr {
+func (c TCPConn) RemoteAddr() net.Addr {
 	return c.laddr
 }
 
