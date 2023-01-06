@@ -4,10 +4,11 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"net"
 	"sync"
 	"time"
 
-	net "github.com/alphahorizonio/tinynet/pkg/tinynet"
+	tnet "github.com/alphahorizonio/tinynet/pkg/tinynet"
 )
 
 var (
@@ -63,10 +64,10 @@ func main() {
 }
 
 func handleServerMode(ip *string, port *string, length *int, interval *int, duration *int) {
-	tcpAddr, err := net.ResolveTCPAddr("tcp", fmt.Sprintf("%v:%v", *ip, *port))
+	tcpAddr, err := tnet.ResolveTCPAddr("tcp", fmt.Sprintf("%v:%v", *ip, *port))
 	checkError(err)
 
-	ln, err := net.ListenTCP("tcp", tcpAddr)
+	ln, err := tnet.ListenTCP("tcp", tcpAddr)
 	checkError(err)
 
 	var wg sync.WaitGroup
@@ -110,10 +111,10 @@ func handleConnection(conn net.Conn, wg *sync.WaitGroup, length *int, interval *
 func handleClientMode(length *int, ip *string, port *string, interval *int) {
 	input := make([]byte, *length)
 
-	tcpAddr, err := net.ResolveTCPAddr("tcp", fmt.Sprintf("%v:%v", *ip, *port))
+	tcpAddr, err := tnet.ResolveTCPAddr("tcp", fmt.Sprintf("%v:%v", *ip, *port))
 	checkError(err)
 
-	conn, err := net.DialTCP("tcp", nil, tcpAddr)
+	conn, err := tnet.DialTCP("tcp", nil, tcpAddr)
 	checkError(err)
 
 	go doEvery(time.Duration(*interval) * time.Second)

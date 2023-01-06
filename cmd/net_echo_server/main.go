@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"net"
 	"os"
 
 	"github.com/alphahorizonio/tinynet/pkg/tinynet"
@@ -32,7 +33,7 @@ func main() {
 
 		fmt.Println("Client connected")
 
-		go func(innerConn tinynet.Conn) {
+		go func(innerConn net.Conn) {
 			for {
 				buf := make([]byte, BUFLEN)
 				if n, err := innerConn.Read(buf); err != nil {
