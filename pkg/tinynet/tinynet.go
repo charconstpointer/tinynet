@@ -127,6 +127,18 @@ func (l *TCPListener) AcceptTCP() (*TCPConn, error) {
 
 	return &TCPConn{
 		fd: clientSocket,
+		laddr: &TCPAddr{
+			stringAddr: "",
+			IP:         l.addr.(*TCPAddr).IP,
+			Port:       l.addr.(*TCPAddr).Port,
+			Zone:       "",
+		},
+		raddr: &TCPAddr{
+			stringAddr: "",
+			IP:         IP{byte(clientAddress.SinAddr.SAddr), byte(clientAddress.SinAddr.SAddr >> 8), byte(clientAddress.SinAddr.SAddr >> 16), byte(clientAddress.SinAddr.SAddr >> 24)},
+			Port:       int(clientAddress.SinPort),
+			Zone:       "",
+		},
 	}, nil
 }
 
